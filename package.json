@@ -1,0 +1,22 @@
+{
+  "name": "email-app",
+  "version": "1.0.0",
+  "description": "for email",
+  "main": "app.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pithiyamilan/email-app.git"
+  },
+  "author": "Milan Pithiya",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pithiyamilan/email-app/issues"
+  },
+  "homepage": "https://github.com/pithiyamilan/email-app#readme",
+  "dependencies": {
+    "express": "^4.17.3"
+  }
+}
