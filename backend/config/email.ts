@@ -12,13 +12,25 @@ export const transportConnection = async (config: any): Promise<any|undefined> =
     return await nodemailer.createTransport(config);
 }
 
-export const sendMail = async(transsactionObj:any,message:any):Promise<any|undefined> => {
-    return await transsactionObj.sendMail(message,((err:any,info:any)=>{
-        if(err){
+export const sendMail = async (transsactionObj: any, message: any): Promise<any | undefined> => {
+    return await transsactionObj.sendMail(message, ((err: any, info: any) => {
+        if (err) {
             console.log(err);
         }
     }));
-}
+};
+//https://stackoverflow.com/questions/56508261/nodemailer-email-confirmation-using-async-await
+export const sendMail1 = async(transactionObj: any, message: any) => {
+    return new Promise((res) => {
+        transactionObj.sendMail(message, ((error: any, info: any) => {
+            if (error) {
+                res({ status: false, message: error });
+            } else { 
+                res({ status: true, message: "Mail Sent." });
+            }
+        }));
+    });
+};
 
 export const contentTransform = async(type:any,content:any,dataPair:any)=>{
     var newData = content;
