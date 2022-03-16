@@ -1,3 +1,5 @@
+import { myconsole } from "./utility";
+
  const nodemailer = require('nodemailer');
  export const partnerEmailTemplate = {
     host: 'smtp.gmail.com',
@@ -24,9 +26,9 @@ export const sendMail1 = async(transactionObj: any, message: any) => {
     return new Promise((res) => {
         transactionObj.sendMail(message, ((error: any, info: any) => {
             if (error) {
-                res({ status: false, message: error });
+                res({ status: "99", message: error.response });
             } else { 
-                res({ status: true, message: "Mail Sent." });
+                res({ status: "0", message: "Mail Sent." });
             }
         }));
     });
@@ -35,7 +37,7 @@ export const sendMail1 = async(transactionObj: any, message: any) => {
 export const contentTransform = async(type:any,content:any,dataPair:any)=>{
     var newData = content;
     var strData:string = newData.toString();
-    console.log('contentTransform start:',Date);
+    myconsole('content is transforming...','');
     switch(type){
         case "productActivation":
             console.log('productActivation case found');
@@ -53,8 +55,8 @@ export const contentTransform = async(type:any,content:any,dataPair:any)=>{
             strData = strData.replace(/#{bvhMobile}/g,dataPair?.bvh?.mobile);
 
             strData = strData.replace(/#{idcUserName}/g,dataPair?.idc?.userName);
-            strData = strData.replace(/#{idcMobile}/g,dataPair?.idc?.emailId);
-            strData = strData.replace(/#{idcEmailId}/g,dataPair?.idc?.mobile);
+            strData = strData.replace(/#{idcMobile}/g,dataPair?.idc?.mobile);
+            strData = strData.replace(/#{idcEmailId}/g,dataPair?.idc?.emailId);
             
             strData = strData.replace(/#{note1}/g,dataPair.note1);
 
