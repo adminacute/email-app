@@ -51,7 +51,7 @@ export const onboardEmail = catchAsyncErrors(async (req: any, res: any, next: an
         
         //partner payout table generate process
         myconsole("payout table generating...",new Date().toUTCString());
-        let mainLabel,payoutContent,payoutContentData,payoutContentDefaultData = "<hr><u><i>Failed to load <b>Payout Details</b>, Kindly contact us for more info.</i></u>"; 
+        let mainLabel,payoutContent,payoutContentData,payoutContentDefaultData = "<u><i>Failed to load <b>Payout Details</b>, Kindly contact us for more info.</i></u>"; 
         let categoryName         = reqBody?.categoryName ?? "";     
         let typeOfPartner        = reqBody?.idcType ?? "";
         let commissionCategName  = reqBody?.commissionCateg ?? "";
