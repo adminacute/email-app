@@ -1,8 +1,8 @@
 // const errorHandler = require("../utils/errorHandler");
 const errorHandler = require("../utils/errorHandler");
-import { dbConnection, database } from '../config/index';
+import { dbConnection, database, sendMail1, myconsole } from '../config/index';
 import { catchAsyncErrors } from '../middlewares/index';
-import {partnerEmailTemplate,transportConnection,contentTransform,sendMail} from '../config/index';
+import {transportConnection,contentTransform,generatePayout} from '../config/index';
 import { utimes } from 'fs';
 const fs = require('fs');
 const errorMessage = "Something went wrong please try again.";
@@ -10,9 +10,9 @@ const errorMessage = "Something went wrong please try again.";
 //send partner onbaord email
 export const onboardEmail = catchAsyncErrors(async (req: any, res: any, next: any) => {
     let connection,flag = false,resObject;
-    let errorData:any;
+    let errorData:any,emailResult:any;
     let reqBody = req.body;
-    console.log('Requst body:',reqBody);
+    myconsole('Request body:',reqBody);
     try {
         //@ts-ignore
         connection = await dbConnection(database);
@@ -36,27 +36,48 @@ export const onboardEmail = catchAsyncErrors(async (req: any, res: any, next: an
         let data:any, reqWithData:any;
         
         const result: any = await connection?.execute(query, [reqBody?.templateId]);
-        console.log("length:",result.rows.length);
+        myconsole("check-length","length:"+result.rows.length);
         if (result.rows.length <= 0) {
             resObject = {
                 status: "99",
-                error_cd: "-99",
-                error_title: "Template Error",
-                error_detail: "configuration not found",
-                error_msg: "No rows found for templateId:"+reqBody?.templateId,
+                message : "configuration not found, Id="+reqBody?.templateId,
             }
             res.send(resObject);
             return;
         }
-        console.log("data fetched:",result.rows);
+        myconsole("data fetched:",result.rows);
         data = result.rows[0] ?? {};
         reqWithData = {...data,...reqBody};
-        console.log("reqWithData",reqWithData);
-        //fetch variables
-        console.log('filePath:',data?.filePath);
-        var content:any =  fs.readFileSync(data?.filePath);
         
-        content = await contentTransform('productActivation',content,reqWithData);
+        //partner payout table generate process
+        myconsole("payout table generating...",new Date().toUTCString());
+        let mainLabel,payoutContent,payoutContentData,payoutContentDefaultData = "<u><i>Failed to load <b>Payout Details</b>, Kindly contact us for more info.</i></u>"; 
+        let categoryName         = reqBody?.categoryName ?? "";     
+        let typeOfPartner        = reqBody?.idcType ?? "";
+        let commissionCategName  = reqBody?.commissionCateg ?? "";
+        if(categoryName && typeOfPartner && commissionCategName){
+            //eg: Retail Loans | IDC/Connector | SILVER
+            mainLabel = categoryName+" | "+typeOfPartner+" | "+commissionCategName; 
+            let params = {
+                categoryCode   : reqBody?.categoryCode,
+                idcTypeCode    : reqBody?.idcTypeCode,
+                commissionCode : reqBody?.commissionCode,
+                mainLabel      : mainLabel  
+            }
+            //calling method to generate
+            payoutContent = await generatePayout(connection,params);
+            if(payoutContent?.status == "0"){
+                payoutContentData = payoutContent?.data; 
+            }else{
+                payoutContentData = payoutContentDefaultData;
+            }
+        }else{
+            payoutContentData = payoutContentDefaultData;
+        }
+        var content:any =  fs.readFileSync(data?.filePath);
+        content = await contentTransform('productActivation',content,payoutContentData,reqWithData);
+        
+        //fetch email configuration
         const emailConfig = {
             host: data?.hostName ?? '',
             port: data?.port ?? '',
@@ -65,12 +86,14 @@ export const onboardEmail = catchAsyncErrors(async (req: any, res: any, next: an
                 pass: data?.password ?? ''
             }
         }
+
+        //create instance for emailSender
         let trans   = await transportConnection(emailConfig);
-        
-        console.log("end transportConnectin:",new Date())
+        //setting up email properties
         let message = {
 			from: data.userId,
             to: reqBody.emailId,
+            replyTo: `noreply.${data.userId}`,
             cc: data.toCC,
             subject: data.subject,
             html: content,attachments:[{
@@ -79,68 +102,74 @@ export const onboardEmail = catchAsyncErrors(async (req: any, res: any, next: an
               cid:'signature'
             }]
        }
-    //    console.log("messageMeta:",message);
-       console.log("start sending:",new Date().toUTCString())
-       const abcd = await sendMail(trans,message);
-       console.log("abcd",abcd);
-       //trans.sendMail(message, function(err:any, info:any) {
-       //console.log("end sending:",new Date().toUTCString())
-    //     if (err) {
-    //       flag = false;
-    //       console.log("Error occured",err.response);
-    //       errorData = err;
-    //     } else {
-    //       flag = true;
-    //       console.log("success",info);
-    //       console.log('Email sent successfully') ;
-    //     }
-    //     });   
-    // } catch (err:any) {
-    //     flag = false;
-    //     console.log('Catch',err);
-    //     errorData = err;
-    //     // return next(new errorHandler("", "", "", "Database Connection Refused.", err, 400));
-    // } finally {
-    //     console.log("final flag",flag);
-    //     if (connection) {
-    //         try {
-    //             await connection.close();
-    //         } catch (err) {
-    //             console.warn("failed to close connection");
-    //             // return next(new errorHandler("", "", "", "Database Connection Refused.", err, 400));
-    //         }
-    //     };
-    //     // return next(new errorHandler("failed to send email", "99", "-99", "Failed to send email.", errorData, 400)); 
-      
+
+       myconsole("email sending...",new Date().toUTCString()) 
+       resObject = emailResult = await sendMail1(trans,message);
+       myconsole("process completed:",new Date().toUTCString()) 
+       myconsole("emailResult",resObject);
     }catch(err:any){
-        console.log("error",err);
-    }
-    // console.log("finish");
-    // return {
-    //     status : 0,
-    //     response_data : {
-    //         message : "email sent"
-    //     }
-    // }
-    res.send({
-        status : 0,
-        response_data : {
-            message : "email sent"
+        myconsole("error",err);
+        resObject = {
+            status: "99",
+            message : err,
         }
-    });
+    }finally {
+        if (connection) {
+            try {
+                await connection.close();
+            } catch (err) {
+                console.warn("failed to close connection",err);
+                // return next(new errorHandler("", "", "", "Database Connection Refused.", err, 400));
+            }
+        };
+    }
+    res.send(resObject);
+    return;
 });
 //test post request
 export const postTest = catchAsyncErrors(async(req:any, res:any, next:any)=>{
-    console.log("post data recevied");
-    const body = req.body;
-    let reqData = body.request_data;
-    let data1 = reqData?.data1;
-    const result = {
-        status : "0",
-        data : data1,
+    let resObject,emailResult;
+    const emailConfig = {
+        host: 'smtp.gmail.com',
+        port: '587',
+        auth: {
+            user: 'sanjay.sen@acuteinformatics.in',
+            pass: 'cxgnguuvdmcbsjur'
+        }
     }
-    res.status(200);
-    res.send(result);
-
+    let trans   = await transportConnection(emailConfig);
+    let content = '<html><body><table border="1" cellspacing="0" cellpadding="12"><tr><th>Name</th><th>Age</th><tr><td>sanjay</td><td>22</td><tr><td>aakash</td><td>22</td></table></body></html>';
+    
+   let data:any = {
+    categoryCode:"12000001",
+    idcTypeCode:"01",
+    commissionCode:"01",
+    mainLabel:"Retail Loans | IDC/Associate | SILVER"
+   }
+   //@ts-ignore
+   let connection = await dbConnection(database);
+   let payoutProcess = await generatePayout(connection,data);
+   let message = {
+    from: 'noreply@acuteinformatics.in',
+    replyTo: 'noreply@acuteinformatics.in',
+    to: 'sanjaysen558@gmail.com',
+    cc: '',
+    subject: 'Test-Email_07/04/2022',
+    html: "<h1>Welcome, Sanjay</h1>"+payoutProcess?.data,attachments:[{
+      filename:'Ratnaafin.png',
+      path:'.\\backend\\templates\\signature.png',  
+      cid:'signature'
+    },{
+        filename:'Ratnaafin1.png',
+        path:'.\\backend\\templates\\signature.png',  
+        cid:'signature1'
+      }]
+}
+   myconsole("messageMeta:",message);
+   myconsole("email sending...",new Date().toUTCString()) 
+   resObject = await sendMail1(trans,message);
+   myconsole("emailResult",resObject);
+   res.send(resObject);
+    // res.send(payoutProcess);
 })
 
