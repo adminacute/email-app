@@ -51,7 +51,7 @@ export const onboardEmail = catchAsyncErrors(async (req: any, res: any, next: an
         
         //partner payout table generate process
         myconsole("payout table generating...",new Date().toUTCString());
-        let mainLabel,payoutContent,payoutContentData,payoutContentDefaultData = "<u><i>Failed to load <b>Payout Details</b>, Kindly contact us for more info.</i></u>"; 
+        let mainLabel,payoutContent,payoutContentData,payoutContentDefaultData = "<u><i>Failed to load <b>Payout Details.</b></i></u>"; 
         let categoryName         = reqBody?.categoryName ?? "";     
         let typeOfPartner        = reqBody?.idcType ?? "";
         let commissionCategName  = reqBody?.commissionCateg ?? "";
@@ -64,6 +64,7 @@ export const onboardEmail = catchAsyncErrors(async (req: any, res: any, next: an
                 commissionCode : reqBody?.commissionCode,
                 mainLabel      : mainLabel  
             }
+            console.log("my param:",params);
             //calling method to generate
             payoutContent = await generatePayout(connection,params);
             if(payoutContent?.status == "0"){
@@ -93,7 +94,6 @@ export const onboardEmail = catchAsyncErrors(async (req: any, res: any, next: an
         let message = {
 			from: data.userId,
             to: reqBody.emailId,
-            replyTo: `noreply.${data.userId}`,
             cc: data.toCC,
             subject: data.subject,
             html: content,attachments:[{
