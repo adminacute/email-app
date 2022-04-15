@@ -1,0 +1,57 @@
+<html>
+<head>
+<style>
+body{
+font-weight:0;
+font-family: arial;
+font-size: 15px;
+}
+p{
+line-height:230%;
+color:#237bdc;
+}
+.light{
+color:#26a456;
+font-weight:600;	
+}
+div{
+color:rgb(136,136,136);
+}
+</style>
+</head>
+<body>
+<p style="font-size:medium">Dear #{firstName} #{lastName},</p>
+<p>Congratulations, Your request has been aprroved for <b>#{productCategory}</b> product.<br>
+<b>Your registration code is <h class="light">#{registrationCode}</h>. The Category is <h class="light">#{category}</h> for <h class="light">#{productCategory}.</h></b><br>
+We encourage you to have transparent communication so you can reach out to us for any comments, suggestions and feedback.<br>
+Your primary point of contact at RATNAAFIN will be as follows:
+<table border = "1" cellpadding="0" cellspacing="0" width="500" style="border-collapse:collapse; border:1px solid black">
+	<tr>
+		<th style = "background-color: #237bdc; color: white; text-align:center;font-size:14px;">Primary Contact Person</th>
+		<th style = "background-color: #237bdc; color: white; text-align:center;font-size:14px;">Secodary Contact Person</th>
+	</tr>
+	<tr>
+		<td style="background-color: white;color:#237bdc;font-size:13px;">#{employeeUserName}</td>
+		<td style="background-color: white;color:#237bdc;font-size:13px;">#{bvhUsername}</td>
+	</tr>
+	<tr>
+		<td style="background-color: white;color:#237bdc;font-size:13px;">#{emloyeeEmailId}</td>
+		<td style="background-color: white;color:#237bdc;font-size:13px;">#{bvhEmailId}</td>
+	</tr>
+	<tr>
+		<td style="background-color: white;color:#237bdc;font-size:13px;">#{employeeMobile}</td>
+		<td style="background-color: white;color:#237bdc;font-size:13px;">#{bvhMobile}</td>
+	</tr>
+</table>
+<p>For any escalation you can contact <b>#{idcUserName}</b> - RSM	Alternate Channel.<br>
+Mobile No: <b>#{idcMobile}</b> | Email ID: <b>#{idcEmailId}</b><br>
+Kindly consider the below payout structure:</p>
+<hr>#{payoutTable}
+<p><b>#{note1}</b></p>
+<p><b>#{signatureLine1}</b></p>
+<p><b>#{signatureLine2}</b></p>
+
+<p><img width="439"  height="127"  src="cid:signature" ></p>
+<div>Disclaimer: #{disclaimer}</div>
+</body>
+</html>
