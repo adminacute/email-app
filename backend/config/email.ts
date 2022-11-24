@@ -93,11 +93,11 @@ export const generatePayout = async(connection:any,{categoryCode,idcTypeCode,com
                         s.tran_cd as "tranCode",
                         s.sr_cd as "srCode",
                         s.line_id as "lineId",
-                        func_get_sub_prod_desc(h.category_cd) as "categoryName", 
+                        func_get_sub_prod_desc(h.category_cd) as "categoryName",
                         replace(to_char(func_get_product_jlist_name('['||h.product_cd||']')),',',',<br>') as "prods",
                         func_get_crm_misc_disp_value('BANK_TYPE',h.bank_type) as "bankType",
-                        trim(to_char(s.from_amount,'99,99,99,99,999.00')) as "fromAmount",
-                        trim(to_char(s.to_amount,'99,99,99,99,999.00')) as "toAmount",
+                        (case to_char(s.from_amount) when '0' then to_char(s.from_amount) else trim(to_char(s.from_amount,'99,99,99,99,99,999.00')) end) as "fromAmount",
+                        (case to_char(s.to_amount) when '0' then to_char(s.to_amount) else trim(to_char(s.to_amount,'99,99,99,99,99,999.00')) end) as "toAmount",
                         trim(to_char(s.percentage,'00.00')) as "percentage"
                 from crm_los_idc_payout_matrix_hdr h,crm_los_idc_payout_matrix_dtl d,crm_los_idc_payout_matrix_sdt s
                 where h.tran_cd = d.tran_cd
