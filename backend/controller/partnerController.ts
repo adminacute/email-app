@@ -134,7 +134,7 @@ export const postTest = catchAsyncErrors(async(req:any, res:any, next:any)=>{
         port: '587',
         auth: {
             user: 'sanjay.sen@acuteinformatics.in',
-            pass: 'cxgnguuvdmcbsjur'
+            pass: 'zgaxvqipwahaijvi'
         }
     }
     let trans   = await transportConnection(emailConfig);
@@ -154,7 +154,7 @@ export const postTest = catchAsyncErrors(async(req:any, res:any, next:any)=>{
     replyTo: 'noreply@acuteinformatics.in',
     to: 'sanjaysen558@gmail.com',
     cc: '',
-    subject: 'Test-Email_07/04/2022',
+    subject: 'Test-Email',
     html: "<h1>Welcome, Sanjay</h1>"+payoutProcess?.data,attachments:[{
       filename:'Ratnaafin.png',
       path:'.\\backend\\templates\\signature.png',  
@@ -168,7 +168,7 @@ export const postTest = catchAsyncErrors(async(req:any, res:any, next:any)=>{
    myconsole("messageMeta:",message);
    myconsole("email sending...",new Date().toUTCString()) 
    resObject = await sendMail1(trans,message);
-   myconsole("emailResult",resObject);
+   myconsole("emailResult",resObject); 
    res.send(resObject);
     // res.send(payoutProcess);
 })
