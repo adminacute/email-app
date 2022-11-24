@@ -98,7 +98,7 @@ export const onboardEmail = catchAsyncErrors(async (req: any, res: any, next: an
             subject: data.subject,
             html: content,attachments:[{
               filename:'Ratnaafin.png',
-              path:'.\\backend\\templates\\signature.png',  
+              path:'./backend/templates/signature.png',  
               cid:'signature'
             }]
        }
