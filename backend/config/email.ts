@@ -25,6 +25,7 @@ export const sendMail = async (transsactionObj: any, message: any): Promise<any 
 export const sendMail1 = async(transactionObj: any, message: any) => {
     return new Promise((res) => {
         transactionObj.sendMail(message, ((error: any, info: any) => {
+            myconsole("Errpr object",error);
             if (error) {
                 res({ status: "99", message: error.response });
             } else { 
