@@ -98,7 +98,7 @@ export const generatePayout = async(connection:any,{categoryCode,idcTypeCode,com
                         func_get_crm_misc_disp_value('BANK_TYPE',h.bank_type) as "bankType",
                         trim(to_char(s.from_amount,'99,99,99,99,999.00')) as "fromAmount",
                         trim(to_char(s.to_amount,'99,99,99,99,999.00')) as "toAmount",
-                        trim(to_char(s.percentage,'0.00')) as "percentage"
+                        trim(to_char(s.percentage,'00.00')) as "percentage"
                 from crm_los_idc_payout_matrix_hdr h,crm_los_idc_payout_matrix_dtl d,crm_los_idc_payout_matrix_sdt s
                 where h.tran_cd = d.tran_cd
                 and d.tran_cd = s.tran_cd
